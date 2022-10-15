@@ -4,7 +4,7 @@ pragma solidity ^0.8.17;
 
 import "hardhat/console.sol";
 
-contract WAGMI {
+contract BlockJournal {
     constructor() {
         console.log("Contructor here, reporting for duty, WAGMI.");
     }
