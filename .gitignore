@@ -5,8 +5,10 @@ coverage.json
 typechain
 typechain-types
 .DS_Store
+hardhat.config.js
 
 #Hardhat files
 cache
 artifacts
+
 

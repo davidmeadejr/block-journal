@@ -1,3 +1,5 @@
+// Address if the deployed contract = 0xac855178ED2E7B8a3C64795E626544a176b619CA
+
 const main = async () => {
   const [deployer] = await hre.ethers.getSigners();
   const accountBalance = await deployer.getBalance();
