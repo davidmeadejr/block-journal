@@ -1,5 +1,5 @@
 const main = async () => {
-  const journalContractFactory = await hre.ethers.getContractFactory("blockJournal"); // Compiles the contract and generates all the needed files to use the contract under the artifacts directory.
+  const journalContractFactory = await hre.ethers.getContractFactory("BlockJournal"); // Compiles the contract and generates all the needed files to use the contract under the artifacts directory.
   const journalContract = await journalContractFactory.deploy(); //
   await journalContract.deployed();
   console.log("Contract deployed to:", journalContract.address);
