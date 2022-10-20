@@ -1,9 +1,81 @@
-import * as React from "react";
+import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 
-export default function App() {
-  const wave = () => {};
+const getEthereumObject = () => window.ethereum;
+
+/*
+ * Functions returns the first linked account found.
+ * If there is no account linked, it will return null.
+ */
+const findMetaMaskAccount = async () => {
+  try {
+    const ethereum = getEthereumObject();
+
+    /*
+     * First ensure that Ethereum object is accessible.
+     */
+    if (!ethereum) {
+      console.error("Make sure you have Metamask!");
+    }
+
+    console.log("We have the Ethereum object", ethereum);
+    const accounts = await ethereum.request({ method: "eth_accounts" });
+
+    if (accounts.length !== 0) {
+      const account = accounts[0];
+      console.log("Found an authorised account:", account);
+      return account;
+    } else {
+      console.error("No authorised account found");
+      return null;
+    }
+  } catch (error) {
+    console.error(error);
+    return null;
+  }
+};
+
+const App = () => {
+  const [currentAccount, setCurrentAccount] = useState("");
+  /*
+   * The passed callback function will be run when the App component mounts (page loads).
+   */
+  // useEffect(async () => {
+  //   const account = await findMetaMaskAccount();
+  //   if (account !== null) {
+  //     setCurrentAccount(account);
+  //   }
+  // }, []);
+
+  const connectWallet = async () => {
+    try {
+      const ethereum = getEthereumObject();
+      if (!ethereum) {
+        alert("Get Metamask!");
+        return;
+      }
+
+      const accounts = await ethereum.request({
+        method: "eth_requestAccounts",
+      });
+
+      console.log("Connected", accounts[0]);
+      setCurrentAccount(accounts[0]);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  useEffect(() => {
+    const findAccount = async () => {
+      const account = await findMetaMaskAccount();
+      if (account !== null) {
+        setCurrentAccount(account);
+      }
+    };
+    findAccount();
+  }, []);
 
   return (
     <div className="mainContainer">
@@ -14,10 +86,20 @@ export default function App() {
           Promoting good habits through daily journalling on the blockchain. For a chance to win free ETH. 🦇🔊
         </div>
 
-        <button className="waveButton" onClick={wave}>
+        <button className="waveButton" onClick={null}>
           Journal 📝
         </button>
+        {/*
+         * If there is no currentAccount render this button
+         */}
+        {!currentAccount && (
+          <button className="journalButton" onClick={connectWallet}>
+            Connect Wallet
+          </button>
+        )}
       </div>
     </div>
   );
-}
+};
+
+export default App;
