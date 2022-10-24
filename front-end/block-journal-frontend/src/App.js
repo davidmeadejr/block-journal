@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/BlockJournal.json";
-import { getContractAddress } from "ethers/lib/utils";
 
 const getEthereumObject = () => window.ethereum;
 
@@ -96,7 +95,6 @@ const App = () => {
 
       console.log("Connected", accounts[0]);
       setCurrentAccount(accounts[0]);
-      getAllJournals();
     } catch (error) {
       console.error(error);
     }
@@ -136,6 +134,7 @@ const App = () => {
       const account = await findMetaMaskAccount();
       if (account !== null) {
         setCurrentAccount(account);
+        getAllJournals();
       }
     };
     findAccount();
@@ -163,12 +162,14 @@ const App = () => {
         <button className="journalButton" onClick={journal}>
           Save Journal 📝
         </button>
+
         {!currentAccount && (
           <button className="journalButton" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
-        {allJournals.map((journal, index) => {
+
+        {allJournals.reverse().map((journal, index) => {
           return (
             <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
               <div>Address: {journal.address}</div>
@@ -181,5 +182,4 @@ const App = () => {
     </div>
   );
 };
-
 export default App;
