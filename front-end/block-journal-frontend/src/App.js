@@ -40,22 +40,47 @@ const findMetaMaskAccount = async () => {
 
 const App = () => {
   const [currentAccount, setCurrentAccount] = useState("");
-  // const [totalJournalVal, setTotalJournalVal] = useState("");
-  /*
-   * The passed callback function will be run when the App component mounts (page loads).
-   */
-  // useEffect(async () => {
-  //   const account = await findMetaMaskAccount();
-  //   if (account !== null) {
-  //     setCurrentAccount(account);
-  //   }
-  // }, []);
+
+  // All state property to store all journals
+  const [allJournals, setAllJournals] = useState([]);
+  const [journalLog, setJournalLog] = useState("");
 
   // Holds the contract address after deployment
-  const contractAddress = "0xac855178ED2E7B8a3C64795E626544a176b619CA";
+  const contractAddress = "0x22cf6548C4292d76A8b33080Ac0C8a6Ad665977A";
 
   // Holds the reference to the abi content
   const contractABI = abi.abi;
+
+  // Gets all the journals from the contract.
+  const getAllJournals = async () => {
+    try {
+      const { ethereum } = window;
+      if (ethereum) {
+        const provider = new ethers.providers.Web3Provider(ethereum);
+        const signer = provider.getSigner();
+        const journalPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+
+        // Call the getAllJournals method from the smart contract
+        const journals = await journalPortalContract.getAllJournals();
+
+        // Enables access to the address, timestamp and message.
+        let journalsCleaned = [];
+        journals.forEach((journal) => {
+          journalsCleaned.push({
+            address: journal.journaler,
+            timestamp: new Date(journal.timestamp * 1000),
+            message: journal.message,
+          });
+        });
+        // Store all data in React state
+        setAllJournals(journalsCleaned);
+      } else {
+        console.log("Ethereum object doesn't exist");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   const connectWallet = async () => {
     try {
@@ -71,6 +96,7 @@ const App = () => {
 
       console.log("Connected", accounts[0]);
       setCurrentAccount(accounts[0]);
+      getAllJournals();
     } catch (error) {
       console.error(error);
     }
@@ -88,8 +114,8 @@ const App = () => {
         let count = await journalPortalContract.getTotalJournals();
         console.log("Retrieved total journals...", count.toNumber());
 
-        // Execute the actual wave from the smart contract.
-        const journalTxn = await journalPortalContract.journal();
+        // Execute the actual journal from the smart contract.
+        const journalTxn = await journalPortalContract.journal(journalLog, { gasLimit: 300000 });
         console.log("Mining...", journalTxn.hash);
 
         await journalTxn.wait();
@@ -104,8 +130,6 @@ const App = () => {
       console.log(error);
     }
   };
-  //   journal();
-  // }, []);
 
   useEffect(() => {
     const findAccount = async () => {
@@ -117,18 +141,6 @@ const App = () => {
     findAccount();
   }, []);
 
-  // useEffect(() => {
-  //   const getTotalJournalsNum = async () => {
-  //     const { ethereum } = window;
-  //     const provider = new ethers.providers.Web3Provider(ethereum);
-  //     const signer = provider.getSigner();
-  //     const journalPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
-  //     const { totalJournalVal } = await journalPortalContract.getTotalJournals();
-  //     setTotalJournalVal(totalJournalVal);
-  //   };
-  //   getTotalJournalsNum();
-  // }, []);
-
   return (
     <div className="mainContainer">
       <div className="dataContainer">
@@ -138,18 +150,33 @@ const App = () => {
           Promoting good habits through daily journalling on the blockchain. For a chance to win free ETH. 🦇🔊
         </div>
 
-        <button className="waveButton" onClick={journal}>
-          Journal 📝
+        {currentAccount ? (
+          <textarea
+            name="Journal Log"
+            placeholder="Write your daily journal..."
+            type="text"
+            id="Journal"
+            value={journalLog}
+            onChange={(e) => setJournalLog(e.target.value)}
+          />
+        ) : null}
+        <button className="journalButton" onClick={journal}>
+          Save Journal 📝
         </button>
-        {/* <div className="totalJournals">Total Number of journals written so far: {}</div> */}
-        {/*
-         * If there is no currentAccount render this button
-         */}
         {!currentAccount && (
           <button className="journalButton" onClick={connectWallet}>
             Connect Wallet
           </button>
         )}
+        {allJournals.map((journal, index) => {
+          return (
+            <div key={index} style={{ backgroundColor: "OldLace", marginTop: "16px", padding: "8px" }}>
+              <div>Address: {journal.address}</div>
+              <div>Time: {journal.timestamp.toString()}</div>
+              <div>Message: {journal.message}</div>
+            </div>
+          );
+        })}
       </div>
     </div>
   );

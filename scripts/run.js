@@ -1,23 +1,23 @@
 const main = async () => {
-  const [owner, randomPerson] = await hre.ethers.getSigners(); // Gets the wallet address of the contract owner and a random wallet address for testing purposes.
   const journalContractFactory = await hre.ethers.getContractFactory("BlockJournal"); // Compiles the contract and generates all the needed files to use the contract under the artifacts directory.
   const journalContract = await journalContractFactory.deploy(); //
   await journalContract.deployed();
+  console.log("Contract address:", journalContract.address);
 
-  console.log("Contract deployed to:", journalContract.address);
-  console.log("Contract deployed by:", owner.address);
+  let journalCount;
+  journalCount = await journalContract.getTotalJournals();
+  console.log(journalCount.toNumber());
 
-  await journalContract.getTotalJournals(); // Grabs the total number of journals.
+  // Mock journals
+  let journalTxn = await journalContract.journal("Testing, testing, 1, 2, 3.");
+  await journalTxn.wait(); // Wait for the transaction to be mined.
 
-  const firstJournalTxn = await journalContract.journal();
-  await firstJournalTxn.wait();
+  const [_, randomPerson] = await hre.ethers.getSigners();
+  journalTxn = await journalContract.connect(randomPerson).journal("Houston we have lift off!");
+  await journalTxn.wait(); // Wait for transaction to be mined
 
-  await journalContract.getTotalJournals();
-
-  const secondJournalTxn = await journalContract.connect(randomPerson).journal();
-  await secondJournalTxn.wait();
-
-  await journalContract.getTotalJournals();
+  let allJournals = await journalContract.getAllJournals();
+  console.log(allJournals);
 };
 
 const runMain = async () => {
@@ -25,6 +25,7 @@ const runMain = async () => {
     await main();
     process.exit(0); // Exit Node process without error.
   } catch (error) {
+    console.log(error);
     process.exit(1); // Exit Node process while indicating 'Uncaught Fatal Exception' error.
   }
 };
