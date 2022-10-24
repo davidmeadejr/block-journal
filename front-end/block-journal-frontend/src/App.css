@@ -3,6 +3,9 @@
   justify-content: center;
   width: 100%;
   margin-top: 64px;
+  align-items: center;
+  text-align: center;
+  min-height: 100vh;
 }
 
 .dataContainer {
@@ -22,6 +25,7 @@
   text-align: center;
   color: gray;
   margin-top: 16px;
+  margin-bottom: 16px;
 }
 
 .journalButton {

@@ -14,7 +14,7 @@ const main = async () => {
 
   await journalContract.getTotalJournals();
 
-  const secondJournalTxn = await journalContract.connect(randomPerson).wave();
+  const secondJournalTxn = await journalContract.connect(randomPerson).journal();
   await secondJournalTxn.wait();
 
   await journalContract.getTotalJournals();
