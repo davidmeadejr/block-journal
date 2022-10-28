@@ -45,7 +45,7 @@ const App = () => {
   const [journalLog, setJournalLog] = useState("");
 
   // Holds the contract address after deployment
-  const contractAddress = "0x22cf6548C4292d76A8b33080Ac0C8a6Ad665977A";
+  const contractAddress = "0xEA5bE015f4b8cf9e3e81128fDC2502Bd5Ee04bfB";
 
   // Holds the reference to the abi content
   const contractABI = abi.abi;

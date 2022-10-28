@@ -1,20 +1,22 @@
 const main = async () => {
   const journalContractFactory = await hre.ethers.getContractFactory("BlockJournal"); // Compiles the contract and generates all the needed files to use the contract under the artifacts directory.
-  const journalContract = await journalContractFactory.deploy(); //
+  const journalContract = await journalContractFactory.deploy({
+    value: hre.ethers.utils.parseEther("0.1"),
+  }); //
   await journalContract.deployed();
   console.log("Contract address:", journalContract.address);
 
-  let journalCount;
-  journalCount = await journalContract.getTotalJournals();
-  console.log(journalCount.toNumber());
+  // Get contract balance
+  let contractBalance = await hre.ethers.provider.getBalance(journalContract.address);
+  console.log("Contract balance:", hre.ethers.utils.formatEther(contractBalance));
 
-  // Mock journals
-  let journalTxn = await journalContract.journal("Testing, testing, 1, 2, 3.");
+  // Send Journal
+  let journalTxn = await journalContract.journal("A message!");
   await journalTxn.wait(); // Wait for the transaction to be mined.
 
-  const [_, randomPerson] = await hre.ethers.getSigners();
-  journalTxn = await journalContract.connect(randomPerson).journal("Houston we have lift off!");
-  await journalTxn.wait(); // Wait for transaction to be mined
+  // Get contract balance to see what happened!
+  contractBalance = await hre.ethers.provider.getBalance(journalContract.address);
+  console.log("Contract Balance:", hre.ethers.utils.formatEther(contractBalance));
 
   let allJournals = await journalContract.getAllJournals();
   console.log(allJournals);

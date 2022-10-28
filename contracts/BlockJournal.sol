@@ -20,14 +20,14 @@ contract BlockJournal {
  Journal[] journals;
 
 
-    constructor() {
+    constructor() payable {
         console.log("SMART CONTRACT HERE REPORTING FOR DUTY, WAGMI.");
     }
 
     // Logs the jounral logged by a users from the frontend.
     function journal(string memory _message) public {
         totalJournals += 1;
-        console.log("%s journalled w/ message %s", msg.sender, _message);
+        console.log("%s has journaled!", msg.sender);
     
     // Stores the journal data in an array
     journals.push(Journal(msg.sender, _message, block.timestamp));
@@ -36,7 +36,18 @@ contract BlockJournal {
     // Emits a new journal which can be seen on the client side of the Dapp.
     emit NewJournal(msg.sender, block.timestamp, _message);
 
+    // Equal to $0.31
+    uint256 prizeAmount = 0.0001 ether;
+
+    require(
+        prizeAmount <=address(this).balance,
+        "Trying to withdraw more money than the contract has."
+    );
+    (bool success, ) = (msg.sender).call{value: prizeAmount}("");
+    require (success, "Failed to withdraw money from contract.");
+
     }
+
 
     // Returns the struct array, journals.
     function getAllJournals() public view returns (Journal[] memory) {
