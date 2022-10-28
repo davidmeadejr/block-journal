@@ -10,9 +10,18 @@ const main = async () => {
   let contractBalance = await hre.ethers.provider.getBalance(journalContract.address);
   console.log("Contract balance:", hre.ethers.utils.formatEther(contractBalance));
 
-  // Send Journal
-  let journalTxn = await journalContract.journal("A message!");
-  await journalTxn.wait(); // Wait for the transaction to be mined.
+  // Testing two journals
+  const journalTxn = await journalContract.journal("This is journal #1.");
+  await journalTxn.wait();
+
+  const journalTxn2 = await journalContract.journal("This is journal #2.");
+  await journalTxn2.wait();
+
+  const journalTxn3 = await journalContract.journal("This is journal #3.");
+  await journalTxn3.wait();
+
+  const journalTxn4 = await journalContract.journal("This is journal #4.");
+  await journalTxn4.wait();
 
   // Get contract balance to see what happened!
   contractBalance = await hre.ethers.provider.getBalance(journalContract.address);

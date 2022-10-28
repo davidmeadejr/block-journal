@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ethers } from "ethers";
+import { Contract, ethers } from "ethers";
 import "./App.css";
 import abi from "./utils/BlockJournal.json";
 
@@ -52,8 +52,9 @@ const App = () => {
 
   // Gets all the journals from the contract.
   const getAllJournals = async () => {
+    const { ethereum } = window;
+
     try {
-      const { ethereum } = window;
       if (ethereum) {
         const provider = new ethers.providers.Web3Provider(ethereum);
         const signer = provider.getSigner();
@@ -62,14 +63,12 @@ const App = () => {
         // Call the getAllJournals method from the smart contract
         const journals = await journalPortalContract.getAllJournals();
 
-        // Enables access to the address, timestamp and message.
-        let journalsCleaned = [];
-        journals.forEach((journal) => {
-          journalsCleaned.push({
+        const journalsCleaned = journals.map((journal) => {
+          return {
             address: journal.journaler,
             timestamp: new Date(journal.timestamp * 1000),
             message: journal.message,
-          });
+          };
         });
         // Store all data in React state
         setAllJournals(journalsCleaned);
@@ -80,6 +79,37 @@ const App = () => {
       console.log(error);
     }
   };
+
+  // Listen in for the emitter events!
+  useEffect(() => {
+    let journalPortalContract;
+
+    const onNewJournal = (from, timestamp, message) => {
+      console.log("NewJournal", from, timestamp, message);
+      setAllJournals((prevState) => [
+        ...prevState,
+        {
+          address: from,
+          timestamp: new Date(journal.timestamp * 1000),
+          message: message,
+        },
+      ]);
+    };
+
+    if (window.ethereum) {
+      const provider = new ethers.providers.Web3Provider(window.ethereum);
+      const signer = provider.getSigner();
+
+      journalPortalContract = new ethers.Contract(contractAddress, contractABI, signer);
+      journalPortalContract.on("NewJournal", onNewJournal);
+    }
+
+    return () => {
+      if (journalPortalContract) {
+        journalPortalContract.off("NewJournal", onNewJournal);
+      }
+    };
+  }, []);
 
   const connectWallet = async () => {
     try {
